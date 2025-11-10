@@ -1,41 +1,42 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('Get by text practice', async ({ page }) => {
+test("Get by text practice", async ({ page }) => {
+  await page.goto("FeedBackForm.html");
 
-    await page.goto('FeedBackForm.html')
+  const title = page.getByText("Feedback Form").first();
+  await expect(title).toBeVisible();
+});
 
-    const title = page.getByText('Feedback Form').first()
-    await expect(title).toBeVisible()
+// get by text is useful when searching for hidden components
+test("Get by text practice - hidden elements", async ({ page }) => {
+  await page.goto("FeedBackForm.html");
 
-})
+  const hiddenButton = page.getByText("Hidden feature");
+  await expect(hiddenButton).not.toBeVisible();
 
-test('Get by text practice - hidden elements', async ({ page }) => {
-    await page.goto('FeedBackForm.html')
+  const hiddenButtonText = await hiddenButton.textContent();
+  console.log(hiddenButtonText);
 
-    const hiddenButton = page.getByText('Hidden feature')
-    await expect(hiddenButton).not.toBeVisible()
+  const hiddenButtonWithRole = page.getByRole("button", {
+    name: "Hidden feature",
+  });
 
-    const hiddenButtonText = await hiddenButton.textContent()
-    console.log(hiddenButtonText)
+  // getByRole only finds visible elements
+  //const hiddenButtonWithRoleText = await hiddenButtonWithRole.textContent() // not working
+  // console.log(hiddenButtonWithRoleText)
+});
 
-    const hiddenButtonWithRole = page.getByRole('button', {
-        name: 'Hidden feature'
+test("Get by text practice - error messages", async ({ page }) => {
+  await page.goto("FeedBackForm.html");
+
+  const emailValidationMessage = page.getByText("Invalid email format");
+  await expect(emailValidationMessage).not.toBeVisible();
+
+  await page
+    .getByRole("textbox", {
+      name: "email",
     })
-    //const hiddenButtonWithRoleText = await hiddenButtonWithRole.textContent() // not working
-    // console.log(hiddenButtonWithRoleText)
-})
+    .fill("john@emailcom");
 
-test('Get by text practice - error messages', async ({ page }) => {
-    await page.goto('FeedBackForm.html')
-
-    const emailValidationMessage = page.getByText('Invalid email format');
-    await expect(emailValidationMessage).not.toBeVisible();
-
-    await page.getByRole('textbox', {
-        name: 'email'
-    }).fill('john@emailcom')
-
-    await expect(emailValidationMessage).toBeVisible();
-
-})
-
+  await expect(emailValidationMessage).toBeVisible();
+});
