@@ -1,47 +1,48 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
 // locators return locators
-test('Child locators', async ({ page }) => {
-    await page.goto('')
+test("Child locators", async ({ page }) => {
+  await page.goto("");
 
-    const servicesList = page.getByRole('list')
-    const serviceItems = await servicesList.getByRole('listitem').all();
-    expect(serviceItems.length).toBeGreaterThan(0)
+  const servicesList = page.getByRole("list");
+  const serviceItems = await servicesList.getByRole("listitem").all();
+  expect(serviceItems.length).toBeGreaterThan(0);
 
-    // with css locators:
-    const serviceItems2 = await page.locator('ul > li').all()
-    for (const item of serviceItems2) {
-        console.log(await item.textContent())
-    } 
-})
+  // with css locators:
+  const serviceItems2 = await page.locator("ul > li").all();
+  for (const item of serviceItems2) {
+    console.log(await item.textContent());
+  }
+});
 
-test('Parent locators', async ({ page }) => {
-    await page.goto('')
+test("Parent locators", async ({ page }) => {
+  await page.goto("");
 
-    const acceptCookiesButton = page.getByTestId('accept-cookies')
-    const cookieBanner = acceptCookiesButton.locator('..')
+  const acceptCookiesButton = page.getByTestId("accept-cookies");
+  // get parent component (like navigating directories)
+  const cookieBanner = acceptCookiesButton.locator("..");
 
-    await acceptCookiesButton.click();
-    await expect(cookieBanner).not.toBeVisible()
+  await acceptCookiesButton.click();
+  await expect(cookieBanner).not.toBeVisible();
+});
 
-})
+test("N-th element locator - buttons", async ({ page }) => {
+  await page.goto("");
 
-test('N-th element locator - buttons', async ({ page }) => {
-    await page.goto('')
+  const buttons = page.getByRole("button");
+  const acceptButton = buttons.first();
+  const declineButton = buttons.last();
 
-    const buttons = page.getByRole('button')
-    const acceptButton = buttons.first();
-    const declineButton = buttons.last();
+  await acceptButton.click();
+  await expect(declineButton).not.toBeVisible();
+});
 
-    await acceptButton.click()
-    await expect(declineButton).not.toBeVisible()
-})
+test("N-th element locator - list items", async ({ page }) => {
+  await page.goto("");
 
-test('N-th element locator - list items', async ({ page }) => {
-    await page.goto('')
+  const listItems = page.getByRole("listitem");
+  // get the third item
+  const thirdItem = listItems.nth(2);
 
-    const listItems = page.getByRole('listitem')
-    const thirdItem = listItems.nth(2)
-
-    console.log(await thirdItem.textContent())
-})
+  console.log(await thirdItem.textContent());
+});
