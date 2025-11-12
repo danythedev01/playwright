@@ -10,9 +10,12 @@ export default defineConfig({
     url: "http://localhost:5000/",
     reuseExistingServer: true,
   },
+  // provides option for the specific brower we use for this test
   use: {
     baseURL: "http://localhost:5000/",
     headless: false,
+    // British english
+    locale: "en-GB",
   },
   // projects: [
   //   {
