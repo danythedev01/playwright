@@ -27,16 +27,16 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      // dependencies: ["auth-setup"],
+      dependencies: ["auth-setup"],
     },
     {
       name: "firefox",
       use: { ...devices["Desktop Firefox"] },
-      // dependencies: ["auth-setup"],
+      dependencies: ["auth-setup"],
     },
-    // {
-    //   name: 'auth-setup',
-    //   testMatch: 'tests/setup/Auth.setup.ts',
-    // }
+    {
+      name: "auth-setup",
+      testMatch: "tests/setup/Auth.setup.ts",
+    },
   ],
 });
