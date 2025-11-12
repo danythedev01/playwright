@@ -2,6 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests",
+  // this will run all the tests that have Form in their description
+  // grep: /Form/,
   reporter: "html",
   webServer: {
     command: "npm start",
