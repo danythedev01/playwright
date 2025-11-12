@@ -1,15 +1,15 @@
-import { test } from '@playwright/test'
-
-
+import { test } from "@playwright/test";
 test.use({
-    baseURL: '',
-    defaultBrowserType: 'firefox',
-    viewport: {
-        width: 1000,
-        height: 600
-    }
-})
-
-test('Observe window', async ({ page }) => {
-    await page.goto('https://www.google.com/')
-})
+  baseURL: "",
+  defaultBrowserType: "firefox",
+  viewport: {
+    width: 1000,
+    height: 600,
+  },
+});
+test.describe("Using use", () => {
+  //
+  test("Observe window", async ({ page }) => {
+    await page.goto("https://www.google.com/");
+  });
+});
