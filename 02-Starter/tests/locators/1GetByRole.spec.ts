@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
 
+test.describe.configure({
+  mode: "serial",
+});
+
 test("Get by Role practice - heading", async ({ page }) => {
   await page.goto("");
 
