@@ -5,63 +5,72 @@ const someEmail = "alex@email.com";
 const someComment = "Awesome!";
 const someHighlights = "Dance session";
 
-test("Form is submitted with required fields", async ({ page }) => {
-  let formSubmitted = false;
-
-  page.on("dialog", async (dialog) => {
-    await dialog.accept();
-    formSubmitted = true;
-  });
-
-  await page.goto("FeedBackForm.html");
-
-  await completeFields(page);
-
-  await clickButton(page, "Submit");
-
-  expect(formSubmitted).toBeTruthy();
+test.beforeEach(() => {
+  console.log("Called before every test in this file");
 });
 
-test("Form is submitted with required fields - form is cleared after submit", async ({
-  page,
-}) => {
-  let formSubmitted = false;
+// organize tests using <describe>
+// hooks like "afterEach" or "beforeEach" are scoped to the <describe> section
+test.describe("Form is submited", () => {
+  test.beforeEach(() => {
+    console.log("Called before and only for <Form is submited> tests");
+  });
+  test("with required fields", async ({ page }) => {
+    let formSubmitted = false;
 
-  page.on("dialog", async (dialog) => {
-    await dialog.accept();
-    formSubmitted = true;
+    page.on("dialog", async (dialog) => {
+      await dialog.accept();
+      formSubmitted = true;
+    });
+
+    await page.goto("FeedBackForm.html");
+
+    await completeFields(page);
+
+    await clickButton(page, "Submit");
+
+    expect(formSubmitted).toBeTruthy();
   });
 
-  await page.goto("FeedBackForm.html");
+  test("and form is cleared after submit", async ({ page }) => {
+    let formSubmitted = false;
 
-  await completeFields(page);
+    page.on("dialog", async (dialog) => {
+      await dialog.accept();
+      formSubmitted = true;
+    });
 
-  await clickButton(page, "Submit");
+    await page.goto("FeedBackForm.html");
 
-  expect(formSubmitted).toBeTruthy();
+    await completeFields(page);
 
-  // check if form is cleared:
-  await checkIfItemsEmpty(page);
-});
+    await clickButton(page, "Submit");
 
-test("Form is NOT submitted without minimal fields", async ({ page }) => {
-  let formSubmitted = false;
+    expect(formSubmitted).toBeTruthy();
 
-  page.on("dialog", (dialog) => {
-    dialog.accept();
-    formSubmitted = true;
+    // check if form is cleared:
+    await checkIfItemsEmpty(page);
   });
 
-  await page.goto("FeedBackForm.html");
+  test("without minimal fields", async ({ page }) => {
+    let formSubmitted = false;
 
-  await completeFields(page);
+    page.on("dialog", (dialog) => {
+      dialog.accept();
+      formSubmitted = true;
+    });
 
-  // clear required field:
-  await page.getByLabel("name").clear();
+    await page.goto("FeedBackForm.html");
 
-  await clickButton(page, "Submit");
+    await completeFields(page);
 
-  expect(formSubmitted).toBeFalsy();
+    // clear required field:
+    await page.getByLabel("name").clear();
+
+    await clickButton(page, "Submit");
+
+    expect(formSubmitted).toBeFalsy();
+  });
 });
 
 test("Form is NOT submitted if user selects NO on dialog", async ({ page }) => {
