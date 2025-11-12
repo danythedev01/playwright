@@ -1,271 +1,330 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, Page } from "@playwright/test";
+const someName = "Alex";
+const someEmail = "alex@email.com";
+const someComment = "Awesome!";
+const someHighlights = "Dance session";
 
-test('Form is submitted with required fields', async ({ page }) => {
-    let formSubmitted = false
-
-    page.on('dialog', dialog => {
-        dialog.accept()
-        formSubmitted = true
+async function clickButton(
+  page: Page,
+  buttonName: "Submit" | "Save" | "Clear"
+) {
+  await page
+    .getByRole("button", {
+      name: buttonName,
     })
+    .click();
+}
 
-    await page.goto('FeedBackForm.html')
+async function completeFields(page: Page) {
+  const nameLabel = page.getByLabel("name");
+  await nameLabel.fill(someName);
 
-    const nameLabel = page.getByLabel('name')
-    await nameLabel.fill('Alex')
+  const emailLabel = page.getByLabel("email");
+  await emailLabel.fill(someEmail);
 
-    const emailLabel = page.getByLabel('email')
-    await emailLabel.fill('alex@email.com')
+  const commentLabel = page.getByLabel("comment");
+  await commentLabel.fill(someComment);
 
-    const commentLabel = page.getByLabel('comment')
-    await commentLabel.fill('Awesome!')
+  const highlightsLabel = page.getByLabel("highlights");
+  await highlightsLabel.fill(someHighlights);
 
-    const checkBox = page.getByRole('checkbox', { name: 'I agree' })
-    await checkBox.check()
+  const checkBox = page.getByRole("checkbox", { name: "I agree" });
+  await checkBox.check();
+}
 
-    await page.getByRole('button', {
-        name: 'Submit'
-    }).click()
+async function checkIfItemsNotEmpty(page: Page) {
+  const nameLabel = page.getByLabel("name");
 
-    expect(formSubmitted).toBeTruthy()    
-    
-})
+  const emailLabel = page.getByLabel("email");
+  const commentLabel = page.getByLabel("comment");
+  const highlightsLabel = page.getByLabel("highlights");
+  const checkbox = page.getByRole("checkbox", {
+    name: "I agree",
+  });
+  await expect(nameLabel).toHaveValue(someName);
+  await expect(emailLabel).toHaveValue(someEmail);
+  await expect(commentLabel).toHaveValue(someComment);
+  await expect(highlightsLabel).toHaveValue(someHighlights);
+  await expect(checkbox).toBeChecked();
+}
 
-test('Form is submitted with required fields - form is cleared after submit', async ({ page }) => {
-    let formSubmitted = false
+async function checkIfItemsEmpty(page: Page) {
+  console.log("test 3");
+  const nameLabel = page.getByLabel("name");
 
-    page.on('dialog', dialog => {
-        dialog.accept()
-        formSubmitted = true
+  const emailLabel = page.getByLabel("email");
+
+  const commentLabel = page.getByLabel("comment");
+
+  const highlightsLabel = page.getByLabel("highlights");
+
+  const checkBox = page.getByRole("checkbox", { name: "I agree" });
+
+  const a = 2;
+  await expect(nameLabel).toBeEmpty();
+  await expect(emailLabel).toBeEmpty();
+  await expect(commentLabel).toBeEmpty();
+  await expect(highlightsLabel).toBeEmpty();
+  await expect(checkBox).not.toBeChecked();
+}
+
+test("Form is submitted with required fields", async ({ page }) => {
+  let formSubmitted = false;
+
+  page.on("dialog", (dialog) => {
+    dialog.accept();
+    formSubmitted = true;
+  });
+
+  await page.goto("FeedBackForm.html");
+
+  await completeFields(page);
+
+  await page
+    .getByRole("button", {
+      name: "Submit",
     })
+    .click();
 
-    await page.goto('FeedBackForm.html')
+  expect(formSubmitted).toBeTruthy();
+});
 
-    const nameLabel = page.getByLabel('name')
-    await nameLabel.fill('Alex')
+test("Form is submitted with required fields - form is cleared after submit", async ({
+  page,
+}) => {
+  let formSubmitted = false;
 
-    const emailLabel = page.getByLabel('email')
-    await emailLabel.fill('alex@email.com')
+  page.on("dialog", (dialog) => {
+    dialog.accept();
+    formSubmitted = true;
+  });
 
-    const commentLabel = page.getByLabel('comment')
-    await commentLabel.fill('Awesome!')
+  await page.goto("FeedBackForm.html");
 
-    const checkBox = page.getByRole('checkbox', { name: 'I agree' })
-    await checkBox.check()
+  await completeFields(page);
 
-    await page.getByRole('button', {
-        name: 'Submit'
-    }).click()
+  // await page
+  //   .getByRole("button", {
+  //     name: "Submit",
+  //   })
+  //   .click();
+  await clickButton(page, "Submit");
 
-    expect(formSubmitted).toBeTruthy() 
+  expect(formSubmitted).toBeTruthy();
+  await checkIfItemsEmpty(page);
+});
 
-    // check if form is cleared:
-    await expect(nameLabel).toBeEmpty()
-    await expect(emailLabel).toBeEmpty()
-    await expect(commentLabel).toBeEmpty()
-    await expect(checkBox).not.toBeChecked()
+test("Form is NOT submitted without minimal fields", async ({ page }) => {
+  let formSubmitted = false;
 
-})
+  page.on("dialog", (dialog) => {
+    dialog.accept();
+    formSubmitted = true;
+  });
 
-test('Form is NOT submitted without minimal fields', async ({ page }) => {
-    let formSubmitted = false
+  await page.goto("FeedBackForm.html");
 
-    page.on('dialog', dialog => {
-        dialog.accept()
-        formSubmitted = true
+  const nameLabel = page.getByLabel("name");
+  await nameLabel.fill("Alex");
+
+  const commentLabel = page.getByLabel("comment");
+  await commentLabel.fill("Awesome!");
+
+  const checkBox = page.getByRole("checkbox", { name: "I agree" });
+  await checkBox.check();
+
+  await page
+    .getByRole("button", {
+      name: "Submit",
     })
+    .click();
 
-    await page.goto('FeedBackForm.html')
+  expect(formSubmitted).toBeFalsy();
+});
 
-    const nameLabel = page.getByLabel('name')
-    await nameLabel.fill('Alex')
+test("Form is NOT submitted if user selects NO on dialog", async ({ page }) => {
+  page.on("dialog", (dialog) => {
+    dialog.dismiss();
+  });
 
-    const commentLabel = page.getByLabel('comment')
-    await commentLabel.fill('Awesome!')
+  await page.goto("FeedBackForm.html");
 
-    const checkBox = page.getByRole('checkbox', { name: 'I agree' })
-    await checkBox.check()
+  const nameLabel = page.getByLabel("name");
+  await nameLabel.fill("Alex");
 
-    await page.getByRole('button', {
-        name: 'Submit'
-    }).click()
+  const emailLabel = page.getByLabel("email");
+  await emailLabel.fill("alex@email.com");
 
-    expect(formSubmitted).toBeFalsy() 
+  const commentLabel = page.getByLabel("comment");
+  await commentLabel.fill("Awesome!");
 
-})
+  const checkBox = page.getByRole("checkbox", { name: "I agree" });
+  await checkBox.check();
 
-test('Form is NOT submitted if user selects NO on dialog', async ({ page }) => {
-    page.on('dialog', dialog => {
-        dialog.dismiss()
+  await page
+    .getByRole("button", {
+      name: "Submit",
     })
+    .click();
 
-    await page.goto('FeedBackForm.html')
-
-    const nameLabel = page.getByLabel('name')
-    await nameLabel.fill('Alex')
-
-    const emailLabel = page.getByLabel('email')
-    await emailLabel.fill('alex@email.com')
-
-    const commentLabel = page.getByLabel('comment')
-    await commentLabel.fill('Awesome!')
-
-    const checkBox = page.getByRole('checkbox', { name: 'I agree' })
-    await checkBox.check()
-
-    await page.getByRole('button', {
-        name: 'Submit'
-    }).click()
-
-    // check if form is NOT cleared:
-    await expect(nameLabel).toHaveValue('Alex') // DO not use toHaveText, it's not working
-    await expect(emailLabel).toHaveValue('alex@email.com')
-    await expect(commentLabel).toHaveValue('Awesome!')
-    await expect(checkBox).toBeChecked()
-})
+  // check if form is NOT cleared:
+  await expect(nameLabel).toHaveValue("Alex"); // DO not use toHaveText, it's not working
+  await expect(emailLabel).toHaveValue("alex@email.com");
+  await expect(commentLabel).toHaveValue("Awesome!");
+  await expect(checkBox).toBeChecked();
+});
 
 // clear progress tests:
-test('Form is completed - clear button clears inputs', async ({ page }) => {
-    page.on('dialog', dialog => {
-        dialog.accept()
+test("Form is completed - clear button clears inputs", async ({ page }) => {
+  page.on("dialog", (dialog) => {
+    dialog.accept();
+  });
+
+  await page.goto("FeedBackForm.html");
+
+  const nameLabel = page.getByLabel("name");
+  await nameLabel.fill("Alex");
+
+  const emailLabel = page.getByLabel("email");
+  await emailLabel.fill("alex@email.com");
+
+  const commentLabel = page.getByLabel("comment");
+  await commentLabel.fill("Awesome!");
+
+  const highlightsLabel = page.getByLabel("highlights");
+  await commentLabel.fill("Dance session");
+
+  const checkBox = page.getByRole("checkbox", { name: "I agree" });
+  await checkBox.check();
+
+  await page
+    .getByRole("button", {
+      name: "Clear",
     })
+    .click();
 
-    await page.goto('FeedBackForm.html')
+  // check if form is cleared:
+  await expect(nameLabel).toBeEmpty();
+  await expect(emailLabel).toBeEmpty();
+  await expect(commentLabel).toBeEmpty();
+  await expect(highlightsLabel).toBeEmpty();
+  await expect(checkBox).not.toBeChecked();
+});
 
-    const nameLabel = page.getByLabel('name')
-    await nameLabel.fill('Alex')
+test("Form is completed - clear button clears memory", async ({ page }) => {
+  page.on("dialog", (dialog) => {
+    dialog.accept();
+  });
 
-    const emailLabel = page.getByLabel('email')
-    await emailLabel.fill('alex@email.com')
+  await page.goto("FeedBackForm.html");
 
-    const commentLabel = page.getByLabel('comment')
-    await commentLabel.fill('Awesome!')
+  const nameLabel = page.getByLabel("name");
+  await nameLabel.fill("Alex");
 
-    const highlightsLabel = page.getByLabel('highlights')
-    await commentLabel.fill('Dance session')
+  const emailLabel = page.getByLabel("email");
+  await emailLabel.fill("alex@email.com");
 
-    const checkBox = page.getByRole('checkbox', { name: 'I agree' })
-    await checkBox.check()
+  const commentLabel = page.getByLabel("comment");
+  await commentLabel.fill("Awesome!");
 
-    await page.getByRole('button', {
-        name: 'Clear'
-    }).click()
+  const highlightsLabel = page.getByLabel("highlights");
+  await highlightsLabel.fill("Dance session");
 
-    // check if form is cleared:
-    await expect(nameLabel).toBeEmpty()
-    await expect(emailLabel).toBeEmpty()
-    await expect(commentLabel).toBeEmpty()
-    await expect(highlightsLabel).toBeEmpty()
-    await expect(checkBox).not.toBeChecked()
+  const checkBox = page.getByRole("checkbox", { name: "I agree" });
+  await checkBox.check();
 
-})
-
-test('Form is completed - clear button clears memory', async ({ page }) => {
-    page.on('dialog', dialog => {
-        dialog.accept()
+  await page
+    .getByRole("button", {
+      name: "Save",
     })
+    .click();
 
-    await page.goto('FeedBackForm.html')
-
-    const nameLabel = page.getByLabel('name')
-    await nameLabel.fill('Alex')
-
-    const emailLabel = page.getByLabel('email')
-    await emailLabel.fill('alex@email.com')
-
-    const commentLabel = page.getByLabel('comment')
-    await commentLabel.fill('Awesome!')
-
-    const highlightsLabel = page.getByLabel('highlights')
-    await highlightsLabel.fill('Dance session')
-
-    const checkBox = page.getByRole('checkbox', { name: 'I agree' })
-    await checkBox.check()
-
-    await page.getByRole('button', {
-        name: 'Save'
-    }).click()
-
-    await page.getByRole('button', {
-        name: 'Clear'
-    }).click()
-
-    await page.reload()
-
-    // check if form is cleared:
-    await expect(nameLabel).toBeEmpty()
-    await expect(emailLabel).toBeEmpty()
-    await expect(commentLabel).toBeEmpty()
-    await expect(highlightsLabel).toBeEmpty()
-    await expect(checkBox).not.toBeChecked()
-
-})
-
-test('Form is completed - clear button does not clear inputs if dialog rejected', async ({ page }) => {
-    page.on('dialog', dialog => {
-        dialog.dismiss()
+  await page
+    .getByRole("button", {
+      name: "Clear",
     })
+    .click();
 
-    await page.goto('FeedBackForm.html')
+  await page.reload();
 
-    const nameLabel = page.getByLabel('name')
-    await nameLabel.fill('Alex')
+  // check if form is cleared:
+  await expect(nameLabel).toBeEmpty();
+  await expect(emailLabel).toBeEmpty();
+  await expect(commentLabel).toBeEmpty();
+  await expect(highlightsLabel).toBeEmpty();
+  await expect(checkBox).not.toBeChecked();
+});
 
-    const emailLabel = page.getByLabel('email')
-    await emailLabel.fill('alex@email.com')
+test("Form is completed - clear button does not clear inputs if dialog rejected", async ({
+  page,
+}) => {
+  page.on("dialog", (dialog) => {
+    dialog.dismiss();
+  });
 
-    const commentLabel = page.getByLabel('comment')
-    await commentLabel.fill('Awesome!')
+  await page.goto("FeedBackForm.html");
 
-    const highlightsLabel = page.getByLabel('highlights')
-    await highlightsLabel.fill('Dance session')
+  const nameLabel = page.getByLabel("name");
+  await nameLabel.fill("Alex");
 
-    const checkBox = page.getByRole('checkbox', { name: 'I agree' })
-    await checkBox.check()
+  const emailLabel = page.getByLabel("email");
+  await emailLabel.fill("alex@email.com");
 
-    await page.getByRole('button', {
-        name: 'Clear'
-    }).click()
+  const commentLabel = page.getByLabel("comment");
+  await commentLabel.fill("Awesome!");
 
-    // check if form is NOT cleared:
-    await expect(nameLabel).toHaveValue('Alex')
-    await expect(emailLabel).toHaveValue('alex@email.com')
-    await expect(commentLabel).toHaveValue('Awesome!')
-    await expect(checkBox).toBeChecked()
+  const highlightsLabel = page.getByLabel("highlights");
+  await highlightsLabel.fill("Dance session");
 
-})
+  const checkBox = page.getByRole("checkbox", { name: "I agree" });
+  await checkBox.check();
 
-test('Form is completed - save data button saves data', async ({ page }) => {
-    page.on('dialog', dialog => {
-        dialog.accept()
+  await page
+    .getByRole("button", {
+      name: "Clear",
     })
+    .click();
 
-    await page.goto('FeedBackForm.html')
+  // check if form is NOT cleared:
+  await expect(nameLabel).toHaveValue("Alex");
+  await expect(emailLabel).toHaveValue("alex@email.com");
+  await expect(commentLabel).toHaveValue("Awesome!");
+  await expect(checkBox).toBeChecked();
+});
 
-    const nameLabel = page.getByLabel('name')
-    await nameLabel.fill('Alex')
+test("Form is completed - save data button saves data", async ({ page }) => {
+  page.on("dialog", (dialog) => {
+    dialog.accept();
+  });
 
-    const emailLabel = page.getByLabel('email')
-    await emailLabel.fill('alex@email.com')
+  await page.goto("FeedBackForm.html");
 
-    const commentLabel = page.getByLabel('comment')
-    await commentLabel.fill('Awesome!')
+  const nameLabel = page.getByLabel("name");
+  await nameLabel.fill("Alex");
 
-    const highlightsLabel = page.getByLabel('highlights')
-    await highlightsLabel.fill('Dance session')
+  const emailLabel = page.getByLabel("email");
+  await emailLabel.fill("alex@email.com");
 
-    const checkBox = page.getByRole('checkbox', { name: 'I agree' })
-    await checkBox.check()
+  const commentLabel = page.getByLabel("comment");
+  await commentLabel.fill("Awesome!");
 
-    await page.getByRole('button', {
-        name: 'Save'
-    }).click()
+  const highlightsLabel = page.getByLabel("highlights");
+  await highlightsLabel.fill("Dance session");
 
-    await page.reload();
+  const checkBox = page.getByRole("checkbox", { name: "I agree" });
+  await checkBox.check();
 
-    // check if form is NOT cleared:
-    await expect(nameLabel).toHaveValue('Alex')
-    await expect(emailLabel).toHaveValue('alex@email.com')
-    await expect(commentLabel).toHaveValue('Awesome!')
-    await expect(checkBox).toBeChecked()
+  await page
+    .getByRole("button", {
+      name: "Save",
+    })
+    .click();
 
-})
+  await page.reload();
+
+  // check if form is NOT cleared:
+  await expect(nameLabel).toHaveValue("Alex");
+  await expect(emailLabel).toHaveValue("alex@email.com");
+  await expect(commentLabel).toHaveValue("Awesome!");
+  await expect(checkBox).toBeChecked();
+});
