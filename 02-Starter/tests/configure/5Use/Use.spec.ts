@@ -32,5 +32,5 @@ test("Setting options inside the test", async ({ browser }) => {
     locale: "hi-IN",
   });
   const page = await context.newPage();
-  await page.goto("");
+  await page.goto("https://google.com");
 });
