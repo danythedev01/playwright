@@ -23,24 +23,20 @@ export default defineConfig({
     // British english
     locale: "en-GB",
   },
-  // projects: [
-  //   {
-  //     name: 'chromium',
-  //     use: { ...devices['Desktop Chrome'], },
-  //     dependencies:[
-  //       'auth-setup'
-  //     ]
-  //   },
-  //   {
-  //     name: 'firefox',
-  //     use: { ...devices['Desktop Firefox'] },
-  //     dependencies:[
-  //       'auth-setup'
-  //     ]
-  //   },
-  //   {
-  //     name: 'auth-setup',
-  //     testMatch: 'tests/setup/Auth.setup.ts',
-  //   }
-  // ]
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+      // dependencies: ["auth-setup"],
+    },
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
+      // dependencies: ["auth-setup"],
+    },
+    // {
+    //   name: 'auth-setup',
+    //   testMatch: 'tests/setup/Auth.setup.ts',
+    // }
+  ],
 });
