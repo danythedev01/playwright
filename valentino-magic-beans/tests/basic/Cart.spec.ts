@@ -66,10 +66,9 @@ test("Complete workflow for product order", async ({ page }) => {
   await contact.fillOrderIdAndEmail(page, orderId!, checkout.testValues.email);
   await contact.clickTrackOrder(page);
 
+  // check if ordered item is returned:
   const firstOrder = page.getByText(addedProduct.name!);
   await expect(firstOrder).toBeVisible();
-
-  //   await contact.clickTrackOrder(page);
 });
 
 /*
