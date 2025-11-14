@@ -1,7 +1,26 @@
 import { test, expect } from "@playwright/test";
+import {
+  addProductToCart,
+  assertProduct,
+  getSubTotal,
+} from "../pages/Products";
 
 test("Item is added to the shopping cart", async ({ page }) => {
-  const firstProductWrapper = page.locator("p-6").first();
+  await page.goto("https://valentinos-magic-beans.click/products");
+
+  const { name: firstProductName, price: firstProductPrice } =
+    await addProductToCart(page, 1);
+
+  await assertProduct(page, firstProductName!);
+
+  await page
+    .locator('[data-test-id="header-cart-button"]')
+    .getByRole("button")
+    .click();
+
+  const subtotal = await getSubTotal(page);
+  const actualSubtotal = Number(firstProductPrice);
+  expect(actualSubtotal).toEqual(subtotal);
 });
 
 /*
