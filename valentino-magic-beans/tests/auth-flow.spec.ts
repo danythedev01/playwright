@@ -1,45 +1,48 @@
-import { test } from '@playwright/test';
-import { EmailUtils } from './utils/EmailUtils'
-import * as signUpPage from './pages/SignUp'
-import * as loginPage from './pages/Login'
-import { join, resolve } from 'path'
-import { writeFileSync, existsSync, mkdirSync } from 'fs'
+import { test } from "@playwright/test";
+import { EmailUtils } from "./utils/EmailUtils";
+import * as signUpPage from "./pages/SignUp";
+import * as loginPage from "./pages/Login";
+import { join, resolve } from "path";
+import { writeFileSync, existsSync, mkdirSync } from "fs";
 
-const testSignUp = process.env.SIGN_UP_FLOW
+const testSignUp = process.env.SIGN_UP_FLOW;
 
-test('Sign up', async ({page})=>{
-    test.skip(testSignUp !== 'true', 'Skipping sign up test')
+// https://app.mailslurp.com/settings
 
-    const emailUtils = new EmailUtils()
-    const inbox = await emailUtils.createInbox();
+test("Sign up", async ({ page }) => {
+  test.skip(testSignUp !== "true", "Skipping sign up test");
 
-    await page.goto('/signup')
+  const emailUtils = new EmailUtils();
+  const inbox = await emailUtils.createInbox();
 
-    await signUpPage.signUp(page, inbox.emailAddress)
+  await page.goto("/signup");
 
-    const email = await emailUtils.waitForLatestEmail(inbox.id)
-    
-    // get the code\ from the email body:
-    const code = /([0-9]{6})$/.exec(email?.body!)![1];
+  await signUpPage.signUp(page, inbox.emailAddress);
 
-    await signUpPage.addConfirmationCode(page, code)
+  const email = await emailUtils.waitForLatestEmail(inbox.id);
 
-    await loginPage.login(page, inbox.emailAddress, signUpPage.signUpData.pass)
+  // get the code\ from the email body:
+  const code = /([0-9]{6})$/.exec(email?.body!)![1];
 
-    await loginPage.verifySuccessfulLogin(page)
+  console.log({ code });
 
-    // persist login data:
-    const loginData = {
-        email: inbox.emailAddress,
-        pass: signUpPage.signUpData.pass
-    }
-    const authDir = resolve(__dirname, '../playwright/.auth');
-    if (!existsSync(authDir)) {
-        mkdirSync(authDir, { recursive: true });
-    }
-    writeFileSync(
-        join(authDir, 'loginData.json'),
-        JSON.stringify(loginData, null, 2)
-    );
+  await signUpPage.addConfirmationCode(page, code);
 
-})
+  await loginPage.login(page, inbox.emailAddress, signUpPage.signUpData.pass);
+
+  await loginPage.verifySuccessfulLogin(page);
+
+  // persist login data:
+  const loginData = {
+    email: inbox.emailAddress,
+    pass: signUpPage.signUpData.pass,
+  };
+  const authDir = resolve(__dirname, "../playwright/.auth");
+  if (!existsSync(authDir)) {
+    mkdirSync(authDir, { recursive: true });
+  }
+  writeFileSync(
+    join(authDir, "loginData.json"),
+    JSON.stringify(loginData, null, 2)
+  );
+});
