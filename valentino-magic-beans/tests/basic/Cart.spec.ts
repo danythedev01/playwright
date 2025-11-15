@@ -71,6 +71,65 @@ test("Complete workflow for product order", async ({ page }) => {
   await expect(firstOrder).toBeVisible();
 });
 
+test("Complete workflow for product order with steps", async ({ page }) => {
+  await page.goto("/products");
+
+  // getting the types from the built in generic return type
+  // Awaited convert from a promise of a type to the actual type
+  let addedProduct: Awaited<ReturnType<typeof addProductToCart>> = {} as any;
+
+  await test.step("add product to cart", async () => {
+    addedProduct = await addProductToCart(page, 1);
+  });
+
+  await test.step("go to checkout page", async () => {
+    await page
+      .locator('[data-test-id="header-cart-button"]')
+      .getByRole("button")
+      .click();
+
+    await page.getByRole("button", { name: "Proceed to Checkout" }).click();
+  });
+
+  await test.step("complete checkout information", async () => {
+    await checkout.addContactInfo(page);
+    await checkout.addPaymentInfo(page);
+    await checkout.addShippingAddress(page);
+    await checkout.placeOrder(page);
+  });
+
+  let orderId: string | null;
+
+  await test.step("get order id", async () => {
+    // Get orderId
+    const orderWrapper = page.getByText("Your Order ID is:").locator("..");
+    orderId = await orderWrapper.getByRole("paragraph").nth(1).textContent();
+    console.log({ orderId });
+  });
+
+  await test.step("open the contact page", async () => {
+    // open the contact page
+    await page
+      .getByRole("button", {
+        name: "Track Your Order",
+      })
+      .click();
+
+    await contact.fillOrderIdAndEmail(
+      page,
+      orderId!,
+      checkout.testValues.email
+    );
+    await contact.clickTrackOrder(page);
+  });
+
+  await test.step("check if order item is returned", async () => {
+    // check if ordered item is returned:
+    const firstOrder = page.getByText(addedProduct.name!);
+    await expect(firstOrder).toBeVisible();
+  });
+});
+
 /*
 test('Item is added to the shopping cart', async ({ page }) => {
     await page.goto('/products');
