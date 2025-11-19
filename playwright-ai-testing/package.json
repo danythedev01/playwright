@@ -1,0 +1,13 @@
+{
+  "name": "playwright-ecommerce-testing",
+  "version": "1.0.0",
+  "description": "Playwright tests for an e-commerce application.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "typescript": "^5.0.0"
+  }
+}
